@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.jpg" alt="setlist-sync" width="200">
+  <img src="https://raw.githubusercontent.com/mathiassp/setlist-sync/main/logo.jpg" alt="setlist-sync" width="200">
 </p>
 
 <h1 align="center">setlist-sync</h1>
