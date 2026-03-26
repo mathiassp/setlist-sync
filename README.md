@@ -65,6 +65,21 @@ pip install setlist-sync
 
 Requires Python 3.10+.
 
+### Windows
+
+Python is not pre-installed on Windows. To install it:
+
+1. Open a terminal and run `winget install Python.Python.3.13`
+   (or download from [python.org](https://www.python.org/downloads/))
+2. **Important:** During install, check "Add Python to PATH"
+3. Restart your terminal, then run `pip install setlist-sync`
+
+If `setlist-sync` is not recognized as a command, use:
+```powershell
+python -m setlist_sync init
+python -m setlist_sync "https://open.spotify.com/playlist/..."
+```
+
 ### Development install
 
 ```bash

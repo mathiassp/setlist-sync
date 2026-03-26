@@ -138,8 +138,10 @@ def run_init():
     if not music_dir:
         music_dir = "~/Music"
 
-    # 5. Write .env
-    env_path = Path.cwd() / ".env"
+    # 5. Write .env to config directory
+    from setlist_sync.config import CONFIG_DIR, CONFIG_FILE
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    env_path = CONFIG_FILE
     lines = [
         "# setlist-sync configuration",
         f"DJ_SOFTWARE={software}",

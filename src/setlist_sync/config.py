@@ -2,11 +2,27 @@
 
 import os
 import re
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+
+def _get_config_dir() -> Path:
+    """Return the platform-specific config directory for setlist-sync."""
+    if sys.platform == "win32":
+        base = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming"))
+    else:
+        base = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+    return base / "setlist-sync"
+
+
+CONFIG_DIR = _get_config_dir()
+CONFIG_FILE = CONFIG_DIR / ".env"
+
+# Load .env from config directory (also check cwd for backwards compatibility)
+load_dotenv(CONFIG_FILE)
+load_dotenv()  # also loads from cwd if present
 
 # DJ Software preference
 DJ_SOFTWARE = os.getenv("DJ_SOFTWARE", "").lower()  # "djay" or "rekordbox"
@@ -73,14 +89,5 @@ def is_configured() -> bool:
 
 
 def get_env_path() -> Path:
-    """Return the path to the .env file (in current directory or project root)."""
-    # Check current directory first, then walk up to find project root
-    cwd = Path.cwd()
-    for p in [cwd, *cwd.parents]:
-        env_file = p / ".env"
-        if env_file.exists():
-            return env_file
-        # Stop at home directory
-        if p == Path.home():
-            break
-    return cwd / ".env"
+    """Return the path to the .env config file."""
+    return CONFIG_FILE
