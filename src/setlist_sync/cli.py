@@ -257,6 +257,10 @@ def main():
         for t in unmatched:
             print(f"  - {t['spotify_artist']} - {t['spotify_title']}")
 
+    # 6. Check for updates
+    from setlist_sync.update_check import check_for_update
+    check_for_update()
+
 
 if __name__ == "__main__":
     main()
