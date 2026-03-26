@@ -154,12 +154,14 @@ Writes directly to djay Pro's YapDatabase (SQLite-based) by cloning existing pla
 
 ## Supported DJ Software
 
-- **djay Pro** (macOS) — full integration (read library + write playlists)
-- **Rekordbox** 6/7 (macOS) — full integration via pyrekordbox (read library + write playlists)
+| Software | Versions | Platform | Read Library | Write Playlists | Status |
+|----------|----------|----------|:------------:|:---------------:|--------|
+| **djay Pro** | 5.x | macOS | Yes | Yes | Supported |
+| **Rekordbox** | 6.x / 7.x | macOS, Windows | Yes | Yes | Supported |
+| **Serato DJ** | — | — | — | — | Coming soon |
+| **Traktor** | — | — | — | — | Coming soon |
 
-### Planned
-- Serato DJ
-- Traktor
+> **Note:** setlist-sync was developed and tested with djay Pro 5 and Rekordbox 7. Older versions may work but have not been tested. If you try it with a different version, please [open an issue](https://github.com/mathiassp/setlist-sync/issues) and let us know how it went!
 
 ## Supported Input Sources
 
