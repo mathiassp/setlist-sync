@@ -260,6 +260,13 @@ def main():
         for t in unmatched:
             print(f"  - {t['spotify_artist']} - {t['spotify_title']}")
 
+        # Write unmatched.txt
+        unmatched_path = Path.cwd() / "unmatched.txt"
+        with open(unmatched_path, "w", encoding="utf-8") as f:
+            for t in unmatched:
+                f.write(f"{t['spotify_artist']} - {t['spotify_title']}\n")
+        print(f"\nUnmatched tracks saved to: {unmatched_path}")
+
     # 6. Check for updates
     from setlist_sync.update_check import check_for_update
     check_for_update()
