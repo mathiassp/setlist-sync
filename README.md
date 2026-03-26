@@ -177,10 +177,11 @@ Writes directly to your DJ software's database. For djay Pro, this uses a clone-
 
 ## Limitations
 
-- Playlist names are limited to 34 characters in djay mode
-- Your DJ software must be closed when writing playlists
-- djay Pro integration is macOS only; Rekordbox works on macOS and Windows
+- **djay playlist names** are limited to ~40 characters (depends on your longest existing playlist name). Names that exceed the limit are truncated with a warning.
+- Your DJ software must be **closed** when writing playlists
+- djay Pro integration is **macOS only**; Rekordbox works on macOS and Windows
 - Matching accuracy depends on how tracks are tagged in your library
+- djay integration uses a reverse-engineered database format — a backup is automatically created before every write
 
 ## Contributing
 
