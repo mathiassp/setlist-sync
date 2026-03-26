@@ -1,4 +1,4 @@
-"""Write playlists to djay Pro's SQLite database.
+"""Write playlists to djay Pro's SQLite database (macOS only).
 
 Uses a clone-based approach: copies a real playlist's TSAF blob and patches
 only the UUID and name (padded to same length). Tracks are defined via
@@ -6,6 +6,7 @@ PlaylistItem rows and relationships, not the blob's itemUUIDs list.
 """
 
 import os
+import platform
 import shutil
 import sqlite3
 import subprocess
@@ -117,6 +118,11 @@ def create_djay_playlist(
     db_path=DEFAULT_DJAY_DB,
     dry_run=False,
 ):
+    if platform.system() != "Darwin":
+        print("Error: djay Pro integration is only available on macOS.", file=__import__('sys').stderr)
+        print("Use --rekordbox for cross-platform support.")
+        return None
+
     if _is_djay_running():
         print("WARNING: djay Pro is running. Close it first.")
         return None

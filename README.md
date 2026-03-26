@@ -123,22 +123,24 @@ setlist-sync playlist.csv --playlist-name "Birthday Party"
 ## How It Works
 
 ```
-Spotify URL ─→ spotify_client ─→ Track list (title + artist)
-                                        │
-              ┌─────────────────────────┤
-              │                         │
-djay database │  Rekordbox database     │  ~/Music folder
-  djay/library│  rekordbox/library      │  library_scanner
-              │                         │
-              └────────────┬────────────┘
-                           │
-                      matcher (fuzzy match)
-                           │
-              ┌────────────┼────────────┐
-              │            │            │
-        djay/playlist  rekordbox/   output
-        (djay Pro DB)  playlist     (files + M3U)
-                       (Rekordbox DB/XML)
+Spotify URL / CSV ─→ spotify_client ─→ Track list (title + artist)
+                                              │
+                ┌─────────────────────────────┤
+                │              │              │
+  djay database │  Rekordbox   │  ~/Music     │
+  (macOS only)  │  database    │  folder      │
+  djay/library  │  rekordbox/  │  library_    │
+                │  library     │  scanner     │
+                └──────┬───────┘              │
+                       │                      │
+                  matcher (fuzzy match) ◄─────┘
+                       │
+          ┌────────────┼──────────────┐
+          │            │              │
+    djay/playlist  rekordbox/     output
+    (djay Pro DB)  playlist       ├── playlist.m3u
+                   (DB or XML)    ├── unmatched.txt
+                                  └── match_report.csv
 ```
 
 ### Matching

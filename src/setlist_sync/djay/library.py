@@ -1,12 +1,21 @@
-"""Read tracks from djay Pro's SQLite database."""
+"""Read tracks from djay Pro's SQLite database (macOS only)."""
 
 import datetime
 import os
+import platform
 import sqlite3
 import struct
 from pathlib import Path
 
 from setlist_sync.config import normalize_string
+
+
+def _check_macos():
+    if platform.system() != "Darwin":
+        raise RuntimeError(
+            "djay Pro integration is only available on macOS. "
+            "Use --rekordbox for cross-platform support."
+        )
 
 DEFAULT_DJAY_DB = str(
     Path.home()
@@ -100,6 +109,7 @@ def load_djay_library(db_path: str = DEFAULT_DJAY_DB) -> list[dict]:
 
     Returns list of dicts with: title, artist, album, key, date_added, norm_title, norm_artist
     """
+    _check_macos()
     if not os.path.exists(db_path):
         raise FileNotFoundError(f"djay database not found: {db_path}")
 
