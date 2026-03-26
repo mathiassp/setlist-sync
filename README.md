@@ -77,15 +77,37 @@ pip install -e .
 
 ## Usage
 
-### djay Pro mode (default)
+### First-time setup
 
-Creates a playlist directly in your DJ software's database. Close your DJ software before running.
+```bash
+setlist-sync init
+```
+
+This walks you through choosing your DJ software (djay Pro or Rekordbox), finding your database, and setting preferences. Configuration is saved to `.env`.
+
+### Sync a playlist
+
+```bash
+setlist-sync "https://open.spotify.com/playlist/..."
+```
+
+That's it. setlist-sync reads your DJ software from `.env` and creates the playlist directly in its database.
 
 > [!WARNING]
 > Close your DJ software before running — setlist-sync writes directly to the database.
 
+### Custom playlist name
+
 ```bash
 setlist-sync "https://open.spotify.com/playlist/..." --playlist-name "Wedding Jan & An"
+```
+
+### Rekordbox mode
+
+If your `.env` is set to Rekordbox, it works automatically. Or override with a flag:
+
+```bash
+setlist-sync "https://open.spotify.com/playlist/..." --rekordbox
 ```
 
 ### File output mode
@@ -93,7 +115,7 @@ setlist-sync "https://open.spotify.com/playlist/..." --playlist-name "Wedding Ja
 Copies matched files to an output folder with an M3U playlist.
 
 ```bash
-setlist-sync "https://open.spotify.com/playlist/..." --playlist-name "Wedding" --files
+setlist-sync "https://open.spotify.com/playlist/..." --files
 ```
 
 ### CSV input
