@@ -15,7 +15,7 @@
 
 ## The Problem
 
-You're a DJ. A client sends you a Spotify playlist with 50 song requests for their wedding. You need to:
+You're a DJ. A client sends you a Spotify playlist with 50 song requests for their event. You need to:
 1. Figure out which songs you already have
 2. Find them in your library across thousands of tracks
 3. Create a playlist in your DJ software
@@ -31,12 +31,12 @@ setlist-sync "https://open.spotify.com/playlist/..." --playlist-name "Wedding Ja
 
 In under a second, setlist-sync:
 - Fetches the playlist from Spotify (no API key or Premium needed)
-- Fuzzy-matches every track against your djay Pro library (4800+ tracks in 0.4s)
-- Creates a playlist directly in djay with your existing tracks — cues, loops, BPM, and all metadata preserved
+- Fuzzy-matches every track against your DJ library (4800+ tracks in 0.4s)
+- Creates a playlist in your DJ software with your existing tracks — cues, loops, BPM, and all metadata preserved
 - Reports which tracks you're missing so you only download what you need
 
 ```
-Loaded djay library: 4820 tracks
+Loaded library: 4820 tracks
 Matching complete: 43/50 tracks found in library
 Matched in 0.4s
 
@@ -52,7 +52,7 @@ Unmatched tracks:
 - **Spotify URL input** — paste any public playlist link, no API key required
 - **CSV input** — also accepts CSV files (e.g. from Exportify)
 - **Fuzzy matching** — handles spelling differences, remix tags, featured artists, etc.
-- **djay Pro integration** — writes playlists directly to djay's database
+- **DJ software integration** — writes playlists directly to djay Pro and Rekordbox
 - **File-based output** — alternatively copies matched files to an event folder with M3U playlist
 - **Smart normalization** — strips `(feat. ...)`, `(Remastered)`, `- Radio Edit` etc. before matching
 - **Fast** — matches 50 tracks against 5000 in under a second using rapidfuzz
@@ -79,10 +79,10 @@ pip install -e .
 
 ### djay Pro mode (default)
 
-Creates a playlist directly in djay Pro's database.
+Creates a playlist directly in your DJ software's database. Close your DJ software before running.
 
 > [!WARNING]
-> Close djay Pro before running — setlist-sync writes directly to djay's database.
+> Close your DJ software before running — setlist-sync writes directly to the database.
 
 ```bash
 setlist-sync "https://open.spotify.com/playlist/..." --playlist-name "Wedding Jan & An"
@@ -148,9 +148,9 @@ Uses [rapidfuzz](https://github.com/rapidfuzz/RapidFuzz) for fuzzy string matchi
 - **Artist similarity**: 40% weight
 - Normalizes strings before matching: strips remix/edit tags, featured artists, punctuation
 
-### djay Integration
+### DJ Software Integration
 
-Writes directly to djay Pro's YapDatabase (SQLite-based) by cloning existing playlist structures. This preserves full compatibility with djay's proprietary TSAF format. A backup is automatically created before every write.
+Writes directly to your DJ software's database. For djay Pro, this uses a clone-based approach to handle the proprietary TSAF format. For Rekordbox, it uses pyrekordbox to access the encrypted database. A backup is automatically created before every write.
 
 ## Supported DJ Software
 
@@ -176,8 +176,8 @@ Writes directly to djay Pro's YapDatabase (SQLite-based) by cloning existing pla
 ## Limitations
 
 - Playlist names are limited to 34 characters in djay mode
-- djay Pro must be closed when writing playlists
-- macOS only (djay Pro requirement)
+- Your DJ software must be closed when writing playlists
+- djay Pro integration is macOS only; Rekordbox works on macOS and Windows
 - Matching accuracy depends on how tracks are tagged in your library
 
 ## Contributing
