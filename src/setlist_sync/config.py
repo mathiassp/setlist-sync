@@ -1,3 +1,5 @@
+"""Configuration and string normalization for setlist-sync."""
+
 import os
 import re
 from pathlib import Path
@@ -6,11 +8,19 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Spotify credentials
-SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
-SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
-SPOTIFY_REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI", "http://localhost:8080/callback")
-SPOTIFY_USERNAME = os.getenv("SPOTIFY_USERNAME")
+# DJ Software preference
+DJ_SOFTWARE = os.getenv("DJ_SOFTWARE", "").lower()  # "djay" or "rekordbox"
+
+# Database paths
+DJAY_DB_PATH = str(Path(os.getenv("DJAY_DB_PATH", str(
+    Path.home() / "Music" / "djay" / "djay Media Library.djayMediaLibrary" / "MediaLibrary.db"
+))).expanduser())
+REKORDBOX_DB_PATH = os.getenv("REKORDBOX_DB_PATH", "")
+if REKORDBOX_DB_PATH:
+    REKORDBOX_DB_PATH = str(Path(REKORDBOX_DB_PATH).expanduser())
+REKORDBOX_XML_PATH = os.getenv("REKORDBOX_XML_PATH", "")
+if REKORDBOX_XML_PATH:
+    REKORDBOX_XML_PATH = str(Path(REKORDBOX_XML_PATH).expanduser())
 
 # Library settings
 DEFAULT_MUSIC_DIR = str(Path.home() / "Music")
@@ -18,7 +28,7 @@ SUPPORTED_FORMATS = (".mp3", ".wav", ".aiff", ".flac", ".m4a", ".alac")
 LIBRARY_CACHE_FILE = ".library_cache.json"
 
 # Matching settings
-DEFAULT_THRESHOLD = 85
+DEFAULT_THRESHOLD = int(os.getenv("MATCH_THRESHOLD", "85"))
 TITLE_WEIGHT = 0.6
 ARTIST_WEIGHT = 0.4
 
@@ -51,3 +61,22 @@ def normalize_string(s: str) -> str:
     s = re.sub(r"[^\w\s]", " ", s)  # replace punctuation with spaces
     s = re.sub(r"\s+", " ", s)      # collapse multiple spaces
     return s.strip()
+
+
+def is_configured() -> bool:
+    """Check if setlist-sync has been configured (DJ_SOFTWARE is set)."""
+    return bool(DJ_SOFTWARE)
+
+
+def get_env_path() -> Path:
+    """Return the path to the .env file (in current directory or project root)."""
+    # Check current directory first, then walk up to find project root
+    cwd = Path.cwd()
+    for p in [cwd, *cwd.parents]:
+        env_file = p / ".env"
+        if env_file.exists():
+            return env_file
+        # Stop at home directory
+        if p == Path.home():
+            break
+    return cwd / ".env"

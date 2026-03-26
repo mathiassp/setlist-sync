@@ -8,10 +8,25 @@ import time
 
 
 def main():
+    # Handle subcommands before argparse (to avoid conflicts with positional source arg)
+    if len(sys.argv) >= 2 and sys.argv[1] == "init":
+        from setlist_sync.init import run_init
+        run_init()
+        return
+
+    if len(sys.argv) >= 2 and sys.argv[1] == "status":
+        from setlist_sync.status import run_status
+        run_status()
+        return
+
     parser = argparse.ArgumentParser(
         prog="setlist-sync",
         description="Match a streaming playlist against your music library and "
-        "create a playlist in your DJ software.",
+        "create a playlist in your DJ software.\n\n"
+        "Commands:\n"
+        "  setlist-sync init      Interactive first-time setup\n"
+        "  setlist-sync status    Show current configuration and library stats",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
         "source",
@@ -22,28 +37,30 @@ def main():
         help="Name for the created playlist (default: Spotify playlist name)",
     )
 
-    # Output target (mutually exclusive)
+    # Output target overrides (override .env DJ_SOFTWARE)
     target = parser.add_mutually_exclusive_group()
     target.add_argument(
         "--rekordbox",
         nargs="?",
         const="db",
         metavar="XML_PATH",
-        help="Match against Rekordbox library. Without a path: reads database directly. "
-        "With a path: uses XML file (e.g. --rekordbox collection.xml)",
+        help="Use Rekordbox (overrides .env). Without path: database. With path: XML file",
+    )
+    target.add_argument(
+        "--djay",
+        action="store_true",
+        help="Use djay Pro (overrides .env)",
     )
     target.add_argument(
         "--files",
         action="store_true",
         help="Copy matched files to an output folder with M3U playlist",
     )
-    # djay is default when neither --rekordbox nor --files is specified
 
     parser.add_argument(
         "--threshold",
         type=int,
-        default=85,
-        help="Fuzzy match threshold 0-100 (default: 85)",
+        help="Fuzzy match threshold 0-100 (overrides .env MATCH_THRESHOLD)",
     )
     parser.add_argument(
         "--dry-run",
@@ -58,7 +75,7 @@ def main():
     parser.add_argument(
         "--djay-db",
         metavar="PATH",
-        help="Path to djay Pro database (default: ~/Music/djay/djay Media Library.djayMediaLibrary/MediaLibrary.db)",
+        help="Custom djay Pro database path (overrides .env DJAY_DB_PATH)",
     )
     parser.add_argument(
         "--rekordbox-output",
@@ -81,9 +98,40 @@ def main():
     )
     args = parser.parse_args()
 
+    # Load config
+    from setlist_sync.config import (
+        DJ_SOFTWARE, DJAY_DB_PATH, REKORDBOX_DB_PATH,
+        REKORDBOX_XML_PATH, DEFAULT_THRESHOLD, is_configured,
+    )
+
+    # Auto-trigger init if not configured and no explicit flags
+    if not is_configured() and not args.rekordbox and not args.djay and not args.files:
+        print("setlist-sync is not configured yet.\n")
+        from setlist_sync.init import run_init
+        run_init()
+        print("\nNow re-run your command:")
+        print(f'  setlist-sync "{args.source}"')
+        return
+
+    # Determine which DJ software to use (CLI flags override .env)
+    if args.djay:
+        mode = "djay"
+    elif args.rekordbox:
+        mode = "rekordbox"
+    elif args.files:
+        mode = "files"
+    elif DJ_SOFTWARE == "rekordbox":
+        mode = "rekordbox"
+    elif DJ_SOFTWARE == "djay":
+        mode = "djay"
+    else:
+        mode = "djay"  # fallback default
+
+    # Resolve threshold (CLI overrides .env)
+    threshold = args.threshold if args.threshold is not None else DEFAULT_THRESHOLD
+
     # Early check: djay mode requires djay to be closed
-    use_djay = not args.rekordbox and not args.files
-    if use_djay:
+    if mode == "djay":
         from setlist_sync.djay.playlist import _is_djay_running
         if _is_djay_running():
             print("Error: djay Pro is running. Please close it before syncing.", file=sys.stderr)
@@ -118,18 +166,25 @@ def main():
         sys.exit(0)
 
     # 2. Load library
-    if args.rekordbox:
+    if mode == "rekordbox":
         from setlist_sync.rekordbox.library import load_rekordbox_library
-        xml_path = args.rekordbox if args.rekordbox != "db" else None
-        library = load_rekordbox_library(xml_path)
-    elif args.files:
+        # Priority: CLI --rekordbox XML > .env XML > .env DB > auto-discovery
+        if args.rekordbox and args.rekordbox != "db":
+            xml_source = args.rekordbox
+        elif REKORDBOX_XML_PATH:
+            xml_source = REKORDBOX_XML_PATH
+        else:
+            xml_source = None
+        library = load_rekordbox_library(xml_source)
+    elif mode == "files":
         from setlist_sync.config import DEFAULT_MUSIC_DIR, LIBRARY_CACHE_FILE
         from setlist_sync.library_scanner import scan_library
         music_dir = args.music_dir or DEFAULT_MUSIC_DIR
         library = scan_library(music_dir=music_dir, cache_path=LIBRARY_CACHE_FILE)
-    else:
+    else:  # djay
         from setlist_sync.djay.library import load_djay_library
-        library = load_djay_library(db_path=args.djay_db) if args.djay_db else load_djay_library()
+        db_path = args.djay_db or DJAY_DB_PATH
+        library = load_djay_library(db_path=db_path)
 
     if not library:
         print("No tracks found in library.", file=sys.stderr)
@@ -142,7 +197,7 @@ def main():
     matched, unmatched = match_tracks(
         spotify_tracks=playlist["tracks"],
         library_tracks=library,
-        threshold=args.threshold,
+        threshold=threshold,
         collect_all=args.handle_duplicates,
     )
     elapsed = time.time() - start
@@ -159,17 +214,23 @@ def main():
         name = name or "Playlist"
 
     # 4. Output
-    if args.rekordbox:
+    if mode == "rekordbox":
         from setlist_sync.rekordbox.playlist import create_rekordbox_playlist
-        xml_path = args.rekordbox if args.rekordbox != "db" else None
+        # Use XML path if available
+        if args.rekordbox and args.rekordbox != "db":
+            xml_out = args.rekordbox
+        elif REKORDBOX_XML_PATH:
+            xml_out = REKORDBOX_XML_PATH
+        else:
+            xml_out = None
         create_rekordbox_playlist(
             playlist_name=name,
             matched_tracks=matched,
-            xml_path=xml_path,
+            xml_path=xml_out,
             output_path=args.rekordbox_output,
             dry_run=args.dry_run,
         )
-    elif args.files:
+    elif mode == "files":
         from setlist_sync.output import create_event_output
         create_event_output(
             event_name=name,
@@ -178,12 +239,15 @@ def main():
             output_dir=args.output_dir,
             use_symlinks=args.symlink,
         )
-    else:
+    else:  # djay
         from setlist_sync.djay.playlist import create_djay_playlist
-        kwargs = {"playlist_name": name, "matched_tracks": matched, "dry_run": args.dry_run}
-        if args.djay_db:
-            kwargs["db_path"] = args.djay_db
-        create_djay_playlist(**kwargs)
+        db_path = args.djay_db or DJAY_DB_PATH
+        create_djay_playlist(
+            playlist_name=name,
+            matched_tracks=matched,
+            db_path=db_path,
+            dry_run=args.dry_run,
+        )
 
     # 5. Summary
     total = len(playlist["tracks"])
