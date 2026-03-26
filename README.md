@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/mathiassp/setlist-sync/main/logo.jpg" alt="setlist-sync" width="200">
+  <img src="https://raw.githubusercontent.com/mathiassp/setlist-sync/main/assets/logo.jpg" alt="setlist-sync" width="200">
 </p>
 
 <h1 align="center">setlist-sync</h1>
@@ -30,7 +30,7 @@ setlist-sync "https://open.spotify.com/playlist/..." --playlist-name "Wedding Ja
 ```
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/mathiassp/setlist-sync/main/demo.gif" alt="setlist-sync demo" width="700">
+  <img src="https://raw.githubusercontent.com/mathiassp/setlist-sync/main/assets/demo.gif" alt="setlist-sync demo" width="700">
 </p>
 
 In under a second, setlist-sync:
@@ -39,17 +39,12 @@ In under a second, setlist-sync:
 - Creates a playlist in your DJ software with your existing tracks — cues, loops, BPM, and all metadata preserved
 - Reports which tracks you're missing so you only download what you need
 
-```
-Loaded library: 4820 tracks
-Matching complete: 43/50 tracks found in library
-Matched in 0.4s
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mathiassp/setlist-sync/main/assets/setlist-sync-example.png" alt="Spotify playlist matched to Rekordbox" width="700">
+</p>
 
-Done! 43/50 tracks matched, 7 unmatched.
-
-Unmatched tracks:
-  - Rick Astley - Never Gonna Give You Up
-  - Darude - Sandstorm
-```
+> [!NOTE]
+> setlist-sync is **not a music downloader**. It does not download songs from Spotify or any other service. It matches tracks you **already own** in your DJ library against a streaming playlist, so you can quickly build a setlist from your existing collection.
 
 ## Features
 

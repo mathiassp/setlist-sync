@@ -26,6 +26,7 @@ build/
 
 # IDE / tools
 .claude/
+*.tape
 
 # macOS
 .DS_Store
