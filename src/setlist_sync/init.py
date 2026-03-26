@@ -112,11 +112,31 @@ def run_init():
         else:
             print("  Could not read database. The path might be wrong or the software may need to be closed.")
 
-    # 4. Match threshold
+    # 4. Preferences
     print()
-    threshold = input("Match threshold (default: 85, press Enter to keep): ").strip()
+    print("Preferences (press Enter to keep defaults):")
+
+    print()
+    threshold = input("  Match threshold [85]: ").strip()
     if not threshold:
         threshold = "85"
+
+    print()
+    print("  Sometimes the same song exists multiple times in your library")
+    print("  (e.g. on different albums, or a single vs album version).")
+    print("  If enabled, you'll be asked to pick which version to use.")
+    dup_input = input("  Handle duplicates interactively? [y/N]: ").strip().lower()
+    handle_duplicates = "true" if dup_input in ("y", "yes") else "false"
+
+    print()
+    output_dir = input("  Output directory for file mode [output]: ").strip()
+    if not output_dir:
+        output_dir = "output"
+
+    print()
+    music_dir = input("  Music directory for file mode [~/Music]: ").strip()
+    if not music_dir:
+        music_dir = "~/Music"
 
     # 5. Write .env
     env_path = Path.cwd() / ".env"
@@ -136,6 +156,9 @@ def run_init():
     lines.extend([
         "",
         f"MATCH_THRESHOLD={threshold}",
+        f"HANDLE_DUPLICATES={handle_duplicates}",
+        f"OUTPUT_DIR={output_dir}",
+        f"MUSIC_DIR={music_dir}",
         "",
     ])
 

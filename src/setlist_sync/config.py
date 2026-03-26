@@ -23,12 +23,16 @@ if REKORDBOX_XML_PATH:
     REKORDBOX_XML_PATH = str(Path(REKORDBOX_XML_PATH).expanduser())
 
 # Library settings
-DEFAULT_MUSIC_DIR = str(Path.home() / "Music")
+DEFAULT_MUSIC_DIR = str(Path(os.getenv("MUSIC_DIR", str(Path.home() / "Music"))).expanduser())
 SUPPORTED_FORMATS = (".mp3", ".wav", ".aiff", ".flac", ".m4a", ".alac")
 LIBRARY_CACHE_FILE = ".library_cache.json"
 
+# Output settings
+DEFAULT_OUTPUT_DIR = os.getenv("OUTPUT_DIR", "output")
+
 # Matching settings
 DEFAULT_THRESHOLD = int(os.getenv("MATCH_THRESHOLD", "85"))
+HANDLE_DUPLICATES = os.getenv("HANDLE_DUPLICATES", "false").lower() == "true"
 TITLE_WEIGHT = 0.6
 ARTIST_WEIGHT = 0.4
 

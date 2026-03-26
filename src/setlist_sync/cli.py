@@ -70,7 +70,8 @@ def main():
     parser.add_argument(
         "--handle-duplicates",
         action="store_true",
-        help="Interactively choose between multiple library matches per track",
+        default=None,
+        help="Interactively choose between multiple library matches (overrides .env HANDLE_DUPLICATES)",
     )
     parser.add_argument(
         "--djay-db",
@@ -84,12 +85,11 @@ def main():
     )
     parser.add_argument(
         "--music-dir",
-        help="Path to music library for --files mode (default: ~/Music)",
+        help="Path to music library for --files mode (overrides .env MUSIC_DIR)",
     )
     parser.add_argument(
         "--output-dir",
-        default="output",
-        help="Output directory for --files mode (default: output/)",
+        help="Output directory for --files mode (overrides .env OUTPUT_DIR)",
     )
     parser.add_argument(
         "--symlink",
@@ -101,7 +101,8 @@ def main():
     # Load config
     from setlist_sync.config import (
         DJ_SOFTWARE, DJAY_DB_PATH, REKORDBOX_DB_PATH,
-        REKORDBOX_XML_PATH, DEFAULT_THRESHOLD, is_configured,
+        REKORDBOX_XML_PATH, DEFAULT_THRESHOLD, DEFAULT_MUSIC_DIR,
+        DEFAULT_OUTPUT_DIR, HANDLE_DUPLICATES, is_configured,
     )
 
     # Auto-trigger init if not configured and no explicit flags
@@ -127,8 +128,11 @@ def main():
     else:
         mode = "djay"  # fallback default
 
-    # Resolve threshold (CLI overrides .env)
+    # Resolve settings (CLI flags override .env)
     threshold = args.threshold if args.threshold is not None else DEFAULT_THRESHOLD
+    handle_duplicates = args.handle_duplicates if args.handle_duplicates is not None else HANDLE_DUPLICATES
+    output_dir = args.output_dir or DEFAULT_OUTPUT_DIR
+    music_dir = args.music_dir or DEFAULT_MUSIC_DIR
 
     # Early check: djay mode requires djay to be closed
     if mode == "djay":
@@ -177,9 +181,8 @@ def main():
             xml_source = None
         library = load_rekordbox_library(xml_source)
     elif mode == "files":
-        from setlist_sync.config import DEFAULT_MUSIC_DIR, LIBRARY_CACHE_FILE
+        from setlist_sync.config import LIBRARY_CACHE_FILE
         from setlist_sync.library_scanner import scan_library
-        music_dir = args.music_dir or DEFAULT_MUSIC_DIR
         library = scan_library(music_dir=music_dir, cache_path=LIBRARY_CACHE_FILE)
     else:  # djay
         from setlist_sync.djay.library import load_djay_library
@@ -198,12 +201,12 @@ def main():
         spotify_tracks=playlist["tracks"],
         library_tracks=library,
         threshold=threshold,
-        collect_all=args.handle_duplicates,
+        collect_all=handle_duplicates,
     )
     elapsed = time.time() - start
     print(f"Matched in {elapsed:.1f}s")
 
-    if args.handle_duplicates:
+    if handle_duplicates:
         from setlist_sync.duplicate_prompt import resolve_duplicates
         matched = resolve_duplicates(matched)
 
@@ -236,7 +239,7 @@ def main():
             event_name=name,
             matched=matched,
             unmatched=unmatched,
-            output_dir=args.output_dir,
+            output_dir=output_dir,
             use_symlinks=args.symlink,
         )
     else:  # djay
