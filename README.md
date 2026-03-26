@@ -29,6 +29,10 @@ Without this tool, you'd manually search each song, accidentally download duplic
 setlist-sync "https://open.spotify.com/playlist/..." --playlist-name "Wedding Jan & An"
 ```
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mathiassp/setlist-sync/main/demo.gif" alt="setlist-sync demo" width="700">
+</p>
+
 In under a second, setlist-sync:
 - Fetches the playlist from Spotify (no API key or Premium needed)
 - Fuzzy-matches every track against your DJ library (4800+ tracks in 0.4s)
