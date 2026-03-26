@@ -1,0 +1,31 @@
+# Credentials
+.env
+
+# Spotify cache
+.cache-*
+
+# Library cache
+.library_cache.json
+
+# Python
+__pycache__/
+*.pyc
+venv/
+music-matching/
+
+# Generated output
+output/
+*.csv
+*.m3u
+*.xml
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+
+# IDE / tools
+.claude/
+
+# macOS
+.DS_Store

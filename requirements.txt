@@ -1,0 +1,5 @@
+rapidfuzz>=3.0
+spotifyscraper>=2.0
+python-dotenv>=1.0
+mutagen>=1.47
+pyrekordbox>=0.4
